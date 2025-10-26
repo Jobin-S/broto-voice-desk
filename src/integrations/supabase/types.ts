@@ -14,16 +14,204 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      attachments: {
+        Row: {
+          byte_size: number
+          complaint_id: string | null
+          created_at: string
+          id: string
+          mime_type: string
+          original_filename: string
+          owner_user_id: string
+          stored_path: string
+        }
+        Insert: {
+          byte_size: number
+          complaint_id?: string | null
+          created_at?: string
+          id?: string
+          mime_type: string
+          original_filename: string
+          owner_user_id: string
+          stored_path: string
+        }
+        Update: {
+          byte_size?: number
+          complaint_id?: string | null
+          created_at?: string
+          id?: string
+          mime_type?: string
+          original_filename?: string
+          owner_user_id?: string
+          stored_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attachments_complaint_id_fkey"
+            columns: ["complaint_id"]
+            isOneToOne: false
+            referencedRelation: "complaints"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attachments_owner_user_id_fkey"
+            columns: ["owner_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      complaint_status_history: {
+        Row: {
+          changed_at: string
+          changed_by_user_id: string
+          complaint_id: string
+          from_status: Database["public"]["Enums"]["complaint_status"] | null
+          id: string
+          note_snapshot: string | null
+          to_status: Database["public"]["Enums"]["complaint_status"]
+        }
+        Insert: {
+          changed_at?: string
+          changed_by_user_id: string
+          complaint_id: string
+          from_status?: Database["public"]["Enums"]["complaint_status"] | null
+          id?: string
+          note_snapshot?: string | null
+          to_status: Database["public"]["Enums"]["complaint_status"]
+        }
+        Update: {
+          changed_at?: string
+          changed_by_user_id?: string
+          complaint_id?: string
+          from_status?: Database["public"]["Enums"]["complaint_status"] | null
+          id?: string
+          note_snapshot?: string | null
+          to_status?: Database["public"]["Enums"]["complaint_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "complaint_status_history_changed_by_user_id_fkey"
+            columns: ["changed_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "complaint_status_history_complaint_id_fkey"
+            columns: ["complaint_id"]
+            isOneToOne: false
+            referencedRelation: "complaints"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      complaints: {
+        Row: {
+          admin_note: string | null
+          attachment_id: string | null
+          category: Database["public"]["Enums"]["complaint_category"]
+          created_at: string
+          description: string
+          id: string
+          status: Database["public"]["Enums"]["complaint_status"]
+          student_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          admin_note?: string | null
+          attachment_id?: string | null
+          category: Database["public"]["Enums"]["complaint_category"]
+          created_at?: string
+          description: string
+          id?: string
+          status?: Database["public"]["Enums"]["complaint_status"]
+          student_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          admin_note?: string | null
+          attachment_id?: string | null
+          category?: Database["public"]["Enums"]["complaint_category"]
+          created_at?: string
+          description?: string
+          id?: string
+          status?: Database["public"]["Enums"]["complaint_status"]
+          student_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "complaints_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_complaints_attachment"
+            columns: ["attachment_id"]
+            isOneToOne: false
+            referencedRelation: "attachments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          is_active: boolean
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id: string
+          is_active?: boolean
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          is_active?: boolean
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_role: {
+        Args: { user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      is_admin: { Args: { user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "student" | "admin"
+      complaint_category:
+        | "mentor"
+        | "admin"
+        | "academic_counsellor"
+        | "working_hub"
+        | "peer"
+        | "other"
+      complaint_status: "open" | "in_progress" | "resolved"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +338,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["student", "admin"],
+      complaint_category: [
+        "mentor",
+        "admin",
+        "academic_counsellor",
+        "working_hub",
+        "peer",
+        "other",
+      ],
+      complaint_status: ["open", "in_progress", "resolved"],
+    },
   },
 } as const

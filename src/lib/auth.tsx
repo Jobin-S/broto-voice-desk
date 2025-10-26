@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Defer profile fetch
+          // Defer profile fetch with role from user_roles
           setTimeout(async () => {
             const { data: profileData } = await supabase
               .from("profiles")
@@ -45,7 +45,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               .eq("id", session.user.id)
               .single();
             
-            setProfile(profileData);
+            if (profileData) {
+              // Fetch actual role from user_roles table
+              const { data: roleData } = await supabase
+                .from("user_roles")
+                .select("role")
+                .eq("user_id", session.user.id)
+                .single();
+              
+              setProfile({
+                ...profileData,
+                role: roleData?.role || profileData.role
+              });
+            }
           }, 0);
         } else {
           setProfile(null);
@@ -66,7 +78,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             .eq("id", session.user.id)
             .single();
           
-          setProfile(profileData);
+          if (profileData) {
+            // Fetch actual role from user_roles table
+            const { data: roleData } = await supabase
+              .from("user_roles")
+              .select("role")
+              .eq("user_id", session.user.id)
+              .single();
+            
+            setProfile({
+              ...profileData,
+              role: roleData?.role || profileData.role
+            });
+          }
           setLoading(false);
         }, 0);
       } else {
